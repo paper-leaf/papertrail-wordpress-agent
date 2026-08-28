@@ -13,6 +13,7 @@ defined('ABSPATH') || exit;
 const PAPERTRAIL_WP_AGENT_TOKEN_OPTION   = 'papertrail_wordpress_agent_token';
 const PAPERTRAIL_WP_AGENT_SAVE_ACTION    = 'papertrail_wordpress_agent_save';
 const PAPERTRAIL_WP_AGENT_RELEASE_ACTION = 'papertrail_wordpress_agent_release';
+const PAPERTRAIL_WP_AGENT_REST_NAMESPACE = 'papertrail/v1';
 
 /**
  * Register the plugin's own admin page.
@@ -116,4 +117,92 @@ function papertrail_wordpress_agent_redirect_back(string $notice): void
         admin_url('admin.php')
     ));
     exit;
+}
+
+/**
+ * Register the plugin's REST routes.
+ */
+add_action('rest_api_init', 'papertrail_wordpress_agent_register_routes');
+
+function papertrail_wordpress_agent_register_routes(): void
+{
+    register_rest_route(PAPERTRAIL_WP_AGENT_REST_NAMESPACE, '/status', [
+        'methods'             => 'GET',
+        'callback'            => 'papertrail_wordpress_agent_rest_status',
+        'permission_callback' => 'papertrail_wordpress_agent_check_token',
+    ]);
+}
+
+/**
+ * Custom rewrite to match the API path
+ */
+add_action('init', 'papertrail_wordpress_agent_add_rewrite');
+
+function papertrail_wordpress_agent_add_rewrite(): void
+{
+    add_rewrite_rule(
+        '^api/v1/papertrail/agent/(.+?)/?$',
+        'index.php?rest_route=/' . PAPERTRAIL_WP_AGENT_REST_NAMESPACE . '/$matches[1]',
+        'top'
+    );
+}
+
+/**
+ * Flush rewrite rules on activation and deactivation so the mapping above
+ * is added and removed cleanly.
+ */
+register_activation_hook(__FILE__, 'papertrail_wordpress_agent_flush_rewrites');
+register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
+
+function papertrail_wordpress_agent_flush_rewrites(): void
+{
+    papertrail_wordpress_agent_add_rewrite();
+    flush_rewrite_rules();
+}
+
+/**
+ * Permission callback: require a valid PaperTrail token.
+ *
+ * Compares the hash of the token against the stored hash.
+ *
+ */
+function papertrail_wordpress_agent_check_token(WP_REST_Request $request)
+{
+    $stored = get_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION, '');
+
+    if ($stored === '') {
+        return new WP_Error(
+            'papertrail_no_token',
+            __('No connection token is configured.', 'papertrail-wordpress-agent'),
+            ['status' => 401]
+        );
+    }
+
+    $header = $request->get_header('authorization');
+    $token  = '';
+
+    if (is_string($header) && stripos($header, 'Bearer ') === 0) {
+        $token = trim(substr($header, 7));
+    }
+
+    if ($token === '' || ! hash_equals($stored, hash('sha256', $token))) {
+        return new WP_Error(
+            'papertrail_invalid_token',
+            __('Invalid connection token.', 'papertrail-wordpress-agent'),
+            ['status' => 401]
+        );
+    }
+
+    return true;
+}
+
+/**
+ * GET /papertrail/v1/status
+ */
+function papertrail_wordpress_agent_rest_status(): array
+{
+    return [
+        'status' => 'ok',
+        'agent'  => 'papertrail-wordpress',
+    ];
 }
