@@ -9,3 +9,25 @@
  */
 
 defined('ABSPATH') || exit;
+
+/**
+ * Register the plugin's own admin page.
+ */
+add_action('admin_menu', static function (): void {
+    add_menu_page(
+        __('PaperTrail WordPress Agent', 'papertrail-wordpress-agent'),
+        __('PaperTrail Agent', 'papertrail-wordpress-agent'),
+        'manage_options',
+        'papertrail-wordpress-agent',
+        'papertrail_wordpress_agent_render_page',
+        'dashicons-rss'
+    );
+});
+
+/**
+ * Include the view partial.
+ */
+function papertrail_wordpress_agent_render_page(): void
+{
+    require plugin_dir_path(__FILE__) . 'views/admin-page.php';
+}
