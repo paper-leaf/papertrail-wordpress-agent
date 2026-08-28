@@ -10,6 +10,10 @@
 
 defined('ABSPATH') || exit;
 
+const PAPERTRAIL_WP_AGENT_TOKEN_OPTION   = 'papertrail_wordpress_agent_token';
+const PAPERTRAIL_WP_AGENT_SAVE_ACTION    = 'papertrail_wordpress_agent_save';
+const PAPERTRAIL_WP_AGENT_RELEASE_ACTION = 'papertrail_wordpress_agent_release';
+
 /**
  * Register the plugin's own admin page.
  */
