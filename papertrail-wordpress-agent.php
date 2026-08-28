@@ -76,6 +76,34 @@ function papertrail_wordpress_agent_save_token(): void
 }
 
 /**
+ * Handle the "release token" form submission.
+ *
+ * Deletes the stored token so a new one can be applied.
+ */
+add_action('admin_post_' . PAPERTRAIL_WP_AGENT_RELEASE_ACTION, 'papertrail_wordpress_agent_release_token');
+
+function papertrail_wordpress_agent_release_token(): void
+{
+    // Check if the user has permissions to release the token
+    if (! current_user_can('manage_options')) {
+        wp_die(
+            esc_html__('You do not have permission to do this.', 'papertrail-wordpress-agent'),
+            '',
+            ['response' => 403]
+        );
+    }
+
+    // Check if it's coming from the admin side
+    check_admin_referer(PAPERTRAIL_WP_AGENT_RELEASE_ACTION);
+
+    // Remove the stored token
+    delete_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION);
+
+    // Redirect after releasing
+    papertrail_wordpress_agent_redirect_back('released');
+}
+
+/**
  * Redirect back to the plugin page with a notice code, then stop.
  */
 function papertrail_wordpress_agent_redirect_back(string $notice): void

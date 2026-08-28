@@ -21,6 +21,10 @@ $papertrail_notice        = isset($_GET['papertrail-notice']) ? sanitize_key(wp_
         <div class="notice notice-error is-dismissible">
             <p><?php echo esc_html__('Enter a token before saving.', 'papertrail-wordpress-agent'); ?></p>
         </div>
+    <?php elseif ($papertrail_notice === 'released') : ?>
+        <div class="notice notice-success is-dismissible">
+            <p><?php echo esc_html__('Connection token released.', 'papertrail-wordpress-agent'); ?></p>
+        </div>
     <?php endif; ?>
 
     <?php if ($papertrail_token_applied) : ?>
