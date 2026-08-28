@@ -8,9 +8,20 @@
 defined('ABSPATH') || exit;
 
 $papertrail_token_applied = get_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION, '') !== '';
+$papertrail_notice        = isset($_GET['papertrail-notice']) ? sanitize_key(wp_unslash($_GET['papertrail-notice'])) : '';
 ?>
 <div class="wrap">
     <h1><?php echo esc_html__('PaperTrail WordPress Agent', 'papertrail-wordpress-agent'); ?></h1>
+
+    <?php if ($papertrail_notice === 'saved') : ?>
+        <div class="notice notice-success is-dismissible">
+            <p><?php echo esc_html__('Connection token saved.', 'papertrail-wordpress-agent'); ?></p>
+        </div>
+    <?php elseif ($papertrail_notice === 'empty') : ?>
+        <div class="notice notice-error is-dismissible">
+            <p><?php echo esc_html__('Enter a token before saving.', 'papertrail-wordpress-agent'); ?></p>
+        </div>
+    <?php endif; ?>
 
     <?php if ($papertrail_token_applied) : ?>
 
@@ -38,7 +49,6 @@ $papertrail_token_applied = get_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION, '') !==
                     type="password"
                     id="papertrail-wordpress-agent-token"
                     name="<?php echo esc_attr(PAPERTRAIL_WP_AGENT_TOKEN_OPTION); ?>"
-                    class="regular-text"
                     autocomplete="off"
                 />
             </p>

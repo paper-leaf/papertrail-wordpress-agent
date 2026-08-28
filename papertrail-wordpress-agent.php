@@ -35,3 +35,57 @@ function papertrail_wordpress_agent_render_page(): void
 {
     require plugin_dir_path(__FILE__) . 'views/admin-page.php';
 }
+
+/**
+ * Handle the "save token" form submission.
+ *
+ * The token is hashed and saved.
+ */
+add_action('admin_post_' . PAPERTRAIL_WP_AGENT_SAVE_ACTION, 'papertrail_wordpress_agent_save_token');
+
+function papertrail_wordpress_agent_save_token(): void
+{
+    // Check if the user has permissions to save the token
+    if (! current_user_can('manage_options')) {
+        wp_die(
+            esc_html__('You do not have permission to do this.', 'papertrail-wordpress-agent'),
+            '',
+            ['response' => 403]
+        );
+    }
+
+    // Check if it's coming from the admin side
+    check_admin_referer(PAPERTRAIL_WP_AGENT_SAVE_ACTION);
+
+    $token = '';
+    // Retrieve the submitted token
+    if (isset($_POST[PAPERTRAIL_WP_AGENT_TOKEN_OPTION]) && is_string($_POST[PAPERTRAIL_WP_AGENT_TOKEN_OPTION])) {
+        $token = trim(sanitize_text_field(wp_unslash($_POST[PAPERTRAIL_WP_AGENT_TOKEN_OPTION])));
+    }
+
+    // Redirect if no token provided
+    if ($token === '') {
+        papertrail_wordpress_agent_redirect_back('empty');
+    }
+
+    // Save token to database
+    update_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION, hash('sha256', $token));
+
+    // Redirect after saving
+    papertrail_wordpress_agent_redirect_back('saved');
+}
+
+/**
+ * Redirect back to the plugin page with a notice code, then stop.
+ */
+function papertrail_wordpress_agent_redirect_back(string $notice): void
+{
+    wp_safe_redirect(add_query_arg(
+        [
+            'page'              => 'papertrail-wordpress-agent',
+            'papertrail-notice' => $notice,
+        ],
+        admin_url('admin.php')
+    ));
+    exit;
+}
