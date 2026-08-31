@@ -21,7 +21,7 @@ require plugin_dir_path(__FILE__) . 'includes/rest.php';
 /**
  * Register the plugin's own admin page.
  */
-add_action('admin_menu', static function (): void {
+add_action('admin_menu', static function () {
     add_menu_page(
         __('PaperTrail WordPress Agent', 'papertrail-wordpress-agent'),
         __('PaperTrail Agent', 'papertrail-wordpress-agent'),
@@ -35,7 +35,7 @@ add_action('admin_menu', static function (): void {
 /**
  * Include the view partial.
  */
-function papertrail_wordpress_agent_render_page(): void
+function papertrail_wordpress_agent_render_page()
 {
     require plugin_dir_path(__FILE__) . 'views/admin-page.php';
 }
@@ -47,7 +47,7 @@ function papertrail_wordpress_agent_render_page(): void
  */
 add_action('admin_post_' . PAPERTRAIL_WP_AGENT_SAVE_ACTION, 'papertrail_wordpress_agent_save_token');
 
-function papertrail_wordpress_agent_save_token(): void
+function papertrail_wordpress_agent_save_token()
 {
     // Check if the user has permissions to save the token
     if (! current_user_can('manage_options')) {
@@ -86,7 +86,7 @@ function papertrail_wordpress_agent_save_token(): void
  */
 add_action('admin_post_' . PAPERTRAIL_WP_AGENT_RELEASE_ACTION, 'papertrail_wordpress_agent_release_token');
 
-function papertrail_wordpress_agent_release_token(): void
+function papertrail_wordpress_agent_release_token()
 {
     // Check if the user has permissions to release the token
     if (! current_user_can('manage_options')) {
@@ -110,7 +110,7 @@ function papertrail_wordpress_agent_release_token(): void
 /**
  * Redirect back to the plugin page with a notice code, then stop.
  */
-function papertrail_wordpress_agent_redirect_back(string $notice): void
+function papertrail_wordpress_agent_redirect_back($notice)
 {
     wp_safe_redirect(add_query_arg(
         [
