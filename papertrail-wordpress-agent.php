@@ -14,6 +14,7 @@ const PAPERTRAIL_WP_AGENT_FILE           = __FILE__;
 const PAPERTRAIL_WP_AGENT_TOKEN_OPTION   = 'papertrail_wordpress_agent_token';
 const PAPERTRAIL_WP_AGENT_SAVE_ACTION    = 'papertrail_wordpress_agent_save';
 const PAPERTRAIL_WP_AGENT_RELEASE_ACTION = 'papertrail_wordpress_agent_release';
+const PAPERTRAIL_WP_AGENT_TEST_ACTION    = 'papertrail_wordpress_agent_test';
 const PAPERTRAIL_WP_AGENT_REST_NAMESPACE = 'papertrail/v1';
 
 require plugin_dir_path(__FILE__) . 'includes/rest.php';
@@ -105,6 +106,55 @@ function papertrail_wordpress_agent_release_token()
 
     // Redirect after releasing
     papertrail_wordpress_agent_redirect_back('released');
+}
+
+/**
+ * Handle the "test connection" form submission
+ */
+add_action('admin_post_' . PAPERTRAIL_WP_AGENT_TEST_ACTION, 'papertrail_wordpress_agent_test_connection');
+
+function papertrail_wordpress_agent_test_connection()
+{
+    // Check if the user has permissions to run the test
+    if (! current_user_can('manage_options')) {
+        wp_die(
+            esc_html__('You do not have permission to do this.', 'papertrail-wordpress-agent'),
+            '',
+            ['response' => 403]
+        );
+    }
+
+    // Check if it's coming from the admin side
+    check_admin_referer(PAPERTRAIL_WP_AGENT_TEST_ACTION);
+
+    // Request the status endpoint on the path PaperTrail uses, with no token
+    $response = wp_remote_get(
+        home_url('/api/v1/papertrail/agent/status'),
+        [
+            'timeout' => 10,
+            'headers' => ['Accept' => 'application/json'],
+        ]
+    );
+
+    // Could not reach the endpoint at all
+    if (is_wp_error($response)) {
+        papertrail_wordpress_agent_redirect_back('test-unreachable');
+    }
+
+    $code       = (int) wp_remote_retrieve_response_code($response);
+    $body       = json_decode(wp_remote_retrieve_body($response), true);
+    $error_code = (is_array($body) && isset($body['code'])) ? $body['code'] : '';
+
+    // 401 from our token check means the route resolved and the guard is running
+    if ($code === 401 && $error_code === 'papertrail_invalid_token') {
+        papertrail_wordpress_agent_redirect_back('test-ok');
+    }
+
+    if ($code === 401 && $error_code === 'papertrail_no_token') {
+        papertrail_wordpress_agent_redirect_back('test-no-token');
+    }
+
+    papertrail_wordpress_agent_redirect_back('test-unreachable');
 }
 
 /**

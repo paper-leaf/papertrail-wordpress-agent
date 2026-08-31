@@ -25,11 +25,29 @@ $papertrail_notice        = isset($_GET['papertrail-notice']) ? sanitize_key(wp_
         <div class="notice notice-success is-dismissible">
             <p><?php echo esc_html__('Connection token released.', 'papertrail-wordpress-agent'); ?></p>
         </div>
+    <?php elseif ($papertrail_notice === 'test-ok') : ?>
+        <div class="notice notice-success is-dismissible">
+            <p><?php echo esc_html__('Endpoint reachable and secured. PaperTrail can connect to this site.', 'papertrail-wordpress-agent'); ?></p>
+        </div>
+    <?php elseif ($papertrail_notice === 'test-no-token') : ?>
+        <div class="notice notice-warning is-dismissible">
+            <p><?php echo esc_html__('Endpoint reachable, but no token is applied.', 'papertrail-wordpress-agent'); ?></p>
+        </div>
+    <?php elseif ($papertrail_notice === 'test-unreachable') : ?>
+        <div class="notice notice-error is-dismissible">
+            <p><?php echo esc_html__('Could not reach the agent endpoint. Re-save Permalinks, then try again.', 'papertrail-wordpress-agent'); ?></p>
+        </div>
     <?php endif; ?>
 
     <?php if ($papertrail_token_applied) : ?>
 
         <p><?php echo esc_html__('A connection token is applied. To use a different one, release the current token first.', 'papertrail-wordpress-agent'); ?></p>
+
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+            <input type="hidden" name="action" value="<?php echo esc_attr(PAPERTRAIL_WP_AGENT_TEST_ACTION); ?>" />
+            <?php wp_nonce_field(PAPERTRAIL_WP_AGENT_TEST_ACTION); ?>
+            <?php submit_button(__('Test connection', 'papertrail-wordpress-agent'), 'secondary'); ?>
+        </form>
 
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
             <input type="hidden" name="action" value="<?php echo esc_attr(PAPERTRAIL_WP_AGENT_RELEASE_ACTION); ?>" />
