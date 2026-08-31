@@ -29,7 +29,7 @@ function papertrail_wordpress_agent_register_routes()
     ]);
 
     // Dependencies route - returns all plugin data
-    register_rest_route(PAPERTRAIL_WP_AGENT_REST_NAMESPACE, '/', [
+    register_rest_route(PAPERTRAIL_WP_AGENT_REST_NAMESPACE, '/dependencies', [
         'methods'             => 'GET',
         'callback'            => 'papertrail_wordpress_agent_rest_dependencies',
         'permission_callback' => 'papertrail_wordpress_agent_check_token',
@@ -168,7 +168,7 @@ function papertrail_wordpress_agent_rest_dependencies()
     }
 
     // Make sure the "updates available" data exists before we read it.
-    if (get_site_transient('update_plugins')) {
+    if (!get_site_transient('update_plugins')) {
         // If not, fetch it
         wp_update_plugins();
     }
@@ -190,7 +190,7 @@ function papertrail_wordpress_agent_rest_dependencies()
 
         // Check the pinged update data with the plugin to see if there is an update available
         if (isset($available[$file])) {
-            $update      = $available[$file];
+            $update      = get_object_vars($available[$file]);
             $new_version = isset($update['new_version']) ? $update['new_version'] : '';
         }
 
