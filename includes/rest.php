@@ -67,7 +67,9 @@ function papertrail_wordpress_agent_flush_rewrites()
 /**
  * Permission callback: require a valid PaperTrail token.
  *
- * Compares the hash of the presented token against the stored hash.
+ * Reads the token from the "PaperTrail-Token" header (how PaperTrail sends it),
+ * falling back to "Authorization: Bearer <token>". Compares the SHA-256 hash of
+ * the presented token against the stored hash.
  */
 function papertrail_wordpress_agent_check_token(WP_REST_Request $request)
 {
@@ -81,11 +83,15 @@ function papertrail_wordpress_agent_check_token(WP_REST_Request $request)
         );
     }
 
-    $header = $request->get_header('authorization');
-    $token  = '';
+    // Preferred: the custom header PaperTrail sends
+    $token = trim((string) $request->get_header('papertrail_token'));
 
-    if (is_string($header) && stripos($header, 'Bearer ') === 0) {
-        $token = trim(substr($header, 7));
+    // Fallback: Authorization: Bearer <token>
+    if ($token === '') {
+        $auth = $request->get_header('authorization');
+        if (is_string($auth) && stripos($auth, 'Bearer ') === 0) {
+            $token = trim(substr($auth, 7));
+        }
     }
 
     if ($token === '' || ! hash_equals($stored, hash('sha256', $token))) {
