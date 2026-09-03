@@ -3,9 +3,8 @@
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 $updateChecker = PucFactory::buildUpdateChecker(
-    'http://papertrail.test/api/agent/wordpress/update-request',
-    __DIR__ . '/papertrail-wordpress-agent.php',
+    'https://bitbucket.org/paperleaf/wordpress-agent',
+    PAPERTRAIL_WP_AGENT_FILE,
     'papertrail-wordpress-agent'
 );
 
-$updateChecker->debugMode = true;
