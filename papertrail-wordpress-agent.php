@@ -17,6 +17,8 @@ const PAPERTRAIL_WP_AGENT_RELEASE_ACTION = 'papertrail_wordpress_agent_release';
 const PAPERTRAIL_WP_AGENT_TEST_ACTION    = 'papertrail_wordpress_agent_test';
 const PAPERTRAIL_WP_AGENT_REST_NAMESPACE = 'papertrail/v1';
 
+require plugin_dir_path(__FILE__) . 'plugin-update-checker/plugin-update-checker.php';
+require plugin_dir_path(__FILE__) . 'includes/updates.php';
 require plugin_dir_path(__FILE__) . 'includes/rest.php';
 
 /**
