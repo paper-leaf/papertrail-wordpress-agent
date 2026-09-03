@@ -75,6 +75,30 @@ $papertrail_notice        = isset($_GET['papertrail-notice']) ? sanitize_key(wp_
                 />
             </p>
 
+            <p>
+                <label for="papertrail-wordpress-agent-bitbucket-username">
+                    <?php echo esc_html__('BitBucket username', 'papertrail-wordpress-agent'); ?>
+                </label>
+                <input
+                    type="text"
+                    id="papertrail-wordpress-agent-bitbucket-username"
+                    name="<?php echo esc_attr(PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION); ?>"
+                    autocomplete="off"
+                />
+            </p>
+
+            <p>
+                <label for="papertrail-wordpress-agent-bitbucket-password">
+                    <?php echo esc_html__('BitBucket API Token', 'papertrail-wordpress-agent'); ?>
+                </label>
+                <input
+                    type="password"
+                    id="papertrail-wordpress-agent-bitbucket-password"
+                    name="<?php echo esc_attr(PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION); ?>"
+                    autocomplete="off"
+                />
+            </p>
+
             <?php submit_button(__('Save token', 'papertrail-wordpress-agent')); ?>
         </form>
 
