@@ -8,7 +8,10 @@ $updateChecker = PucFactory::buildUpdateChecker(
     'papertrail-wordpress-agent'
 );
 
+$bitbucket_username = get_option(PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION, '');
+$bitbucket_password = get_option(PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION, '');
+
 $updateChecker->setAuthentication([
-    'username' => 'info@paper-leaf.com',
-    'api_token' => 'ATATT3xFfGF0lam36KthTDJi5LZkIX3m-sKguyMROT9Vv6pSkJciAHYPWM5iHIHWY2EBzg9zOZGspfw1RH4VugKC7vvjaH-gjeiv31ugkLbLNEDo-1VwhUe7ViN6LqK42m9cIbjPVFOdxgQdOBMAclZY11broxXhNkS-4Q1--mQoxEbhU5eg_i4=7E283E71',
+    'username' => $bitbucket_username,
+    'api_token' => $bitbucket_password,
 ]);
