@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       PaperTrail WordPress Agent
  * Description:       Securely connects this WordPress site to PaperTrail, exposing read-only site and plugin data over an authenticated REST API.
- * Version:           1.3.1
+ * Version:           1.3.2
  * Author:            Paper Leaf
  * Author URI:        https://paper-leaf.com
  * Text Domain:       papertrail-wordpress-agent
@@ -20,9 +20,10 @@ const PAPERTRAIL_WP_AGENT_TEST_ACTION               = 'papertrail_wordpress_agen
 const PAPERTRAIL_WP_AGENT_REST_NAMESPACE            = 'papertrail/v1';
 
 require plugin_dir_path(__FILE__) . 'plugin-update-checker/plugin-update-checker.php';
-require plugin_dir_path(__FILE__) . 'includes/updates.php';
 require plugin_dir_path(__FILE__) . 'includes/encryption.php';
+require plugin_dir_path(__FILE__) . 'includes/bitbucket.php';
 require plugin_dir_path(__FILE__) . 'includes/rest.php';
+require plugin_dir_path(__FILE__) . 'includes/updates.php';
 
 /**
  * Register the plugin's own admin page.
@@ -91,8 +92,11 @@ function papertrail_wordpress_agent_save_token()
 
     // Save token to database
     update_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION, hash('sha256', $token));
-    update_option(PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION, $bitbucket_username);
-    update_option(PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION, $bitbucket_password);
+
+    papertrail_save_bitbucket_credentials(
+        $bitbucket_username,
+        $bitbucket_password
+    );
 
     // Redirect after saving
     papertrail_wordpress_agent_redirect_back('saved');

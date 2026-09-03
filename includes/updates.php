@@ -1,17 +1,27 @@
 <?php
 
+defined('ABSPATH') || exit;
+
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-$updateChecker = PucFactory::buildUpdateChecker(
-    'https://bitbucket.org/paperleaf/wordpress-agent',
-    PAPERTRAIL_WP_AGENT_FILE,
-    'papertrail-wordpress-agent'
-);
+add_action('plugins_loaded', function () {
 
-$bitbucket_username = get_option(PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION, '');
-$bitbucket_password = get_option(PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION, '');
+    $updateChecker = PucFactory::buildUpdateChecker(
+        'https://bitbucket.org/paperleaf/wordpress-agent',
+        PAPERTRAIL_WP_AGENT_FILE,
+        'papertrail-wordpress-agent'
+    );
 
-$updateChecker->setAuthentication([
-    'username' => $bitbucket_username,
-    'api_token' => $bitbucket_password,
-]);
+    $username = papertrail_get_bitbucket_username();
+    $token = papertrail_get_bitbucket_token();
+
+    if ($username === '' || $token === '') {
+        return;
+    }
+
+    $updateChecker->setAuthentication([
+        'username' => $username,
+        'api_token' => $token,
+    ]);
+
+}, 20);
