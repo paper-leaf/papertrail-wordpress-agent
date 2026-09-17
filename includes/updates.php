@@ -7,21 +7,19 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 add_action('plugins_loaded', function () {
 
     $updateChecker = PucFactory::buildUpdateChecker(
-        'https://bitbucket.org/paperleaf/wordpress-agent',
+        'https://github.com/paper-leaf/papertrail-wordpress-agent',
         PAPERTRAIL_WP_AGENT_FILE,
         'papertrail-wordpress-agent'
     );
 
-    $username = papertrail_get_bitbucket_username();
-    $token = papertrail_get_bitbucket_token();
+    // Set the access details
+    $updateChecker->setBranch('main');
 
-    if ($username === '' || $token === '') {
+    $token = papertrail_get_github_token();
+    if ($token === '') {
         return;
     }
 
-    $updateChecker->setAuthentication([
-        'username' => $username,
-        'api_token' => $token,
-    ]);
+    $updateChecker->setAuthentication($token);
 
 }, 20);

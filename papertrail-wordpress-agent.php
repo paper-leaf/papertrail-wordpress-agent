@@ -12,8 +12,7 @@ defined('ABSPATH') || exit;
 
 const PAPERTRAIL_WP_AGENT_FILE                      = __FILE__;
 const PAPERTRAIL_WP_AGENT_TOKEN_OPTION              = 'papertrail_wordpress_agent_token';
-const PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION = 'papertrail_wordpress_agent_bitbucket_username';
-const PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION = 'papertrail_wordpress_agent_bitbucket_password';
+const PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION       = 'papertrail_wordpress_agent_github_token';
 const PAPERTRAIL_WP_AGENT_SAVE_ACTION               = 'papertrail_wordpress_agent_save';
 const PAPERTRAIL_WP_AGENT_RELEASE_ACTION            = 'papertrail_wordpress_agent_release';
 const PAPERTRAIL_WP_AGENT_TEST_ACTION               = 'papertrail_wordpress_agent_test';
@@ -21,7 +20,7 @@ const PAPERTRAIL_WP_AGENT_REST_NAMESPACE            = 'papertrail/v1';
 
 require plugin_dir_path(__FILE__) . 'plugin-update-checker/plugin-update-checker.php';
 require plugin_dir_path(__FILE__) . 'includes/encryption.php';
-require plugin_dir_path(__FILE__) . 'includes/bitbucket.php';
+require plugin_dir_path(__FILE__) . 'includes/github.php';
 require plugin_dir_path(__FILE__) . 'includes/rest.php';
 require plugin_dir_path(__FILE__) . 'includes/updates.php';
 
@@ -74,15 +73,10 @@ function papertrail_wordpress_agent_save_token()
         $token = trim(sanitize_text_field(wp_unslash($_POST[PAPERTRAIL_WP_AGENT_TOKEN_OPTION])));
     }
 
-    // Retrieve the BitBucket creds
-    $bitbucket_username = '';
-    $bitbucket_password = '';
-    if (isset($_POST[PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION]) && is_string($_POST[PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION])) {
-        $bitbucket_username = trim(sanitize_text_field(wp_unslash($_POST[PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION])));
-    }
-
-    if (isset($_POST[PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION]) && is_string($_POST[PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION])) {
-        $bitbucket_password = trim(sanitize_text_field(wp_unslash($_POST[PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION])));
+    // Retrieve the GitHub creds
+    $github_token = '';
+    if (isset($_POST[PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION]) && is_string($_POST[PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION])) {
+        $github_token = trim(sanitize_text_field(wp_unslash($_POST[PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION])));
     }
 
     // Redirect if no token provided
@@ -93,9 +87,8 @@ function papertrail_wordpress_agent_save_token()
     // Save token to database
     update_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION, hash('sha256', $token));
 
-    papertrail_save_bitbucket_credentials(
-        $bitbucket_username,
-        $bitbucket_password
+    papertrail_save_github_credentials(
+        $github_token
     );
 
     // Redirect after saving
@@ -125,8 +118,7 @@ function papertrail_wordpress_agent_release_token()
 
     // Remove the stored token
     delete_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION);
-    delete_option(PAPERTRAIL_WP_AGENT_BITBUCKET_USERNAME_OPTION);
-    delete_option(PAPERTRAIL_WP_AGENT_BITBUCKET_PASSWORD_OPTION);
+    delete_option(PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION);
 
     // Redirect after releasing
     papertrail_wordpress_agent_redirect_back('released');
