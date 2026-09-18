@@ -78,7 +78,7 @@ function papertrail_wordpress_agent_check_token(WP_REST_Request $request)
     if ($stored === '') {
         return new WP_Error(
             'papertrail_no_token',
-            __('No connection token is configured.', 'papertrail-wordpress-agent'),
+            __('Unauthorized', 'papertrail-wordpress-agent'),
             ['status' => 401]
         );
     }
@@ -97,7 +97,7 @@ function papertrail_wordpress_agent_check_token(WP_REST_Request $request)
     if ($token === '' || ! hash_equals($stored, hash('sha256', $token))) {
         return new WP_Error(
             'papertrail_invalid_token',
-            __('Invalid connection token.', 'papertrail-wordpress-agent'),
+            __('Unauthorized', 'papertrail-wordpress-agent'),
             ['status' => 401]
         );
     }
