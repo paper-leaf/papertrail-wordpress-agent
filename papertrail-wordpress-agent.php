@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       PaperTrail WordPress Agent
  * Description:       Securely connects this WordPress site to PaperTrail, exposing read-only site and plugin data over an authenticated REST API.
- * Version:           1.3.4
+ * Version:           1.3.5
  * Author:            Paper Leaf
  * Author URI:        https://paper-leaf.com
  * Text Domain:       papertrail-wordpress-agent
@@ -12,7 +12,6 @@ defined('ABSPATH') || exit;
 
 const PAPERTRAIL_WP_AGENT_FILE                      = __FILE__;
 const PAPERTRAIL_WP_AGENT_TOKEN_OPTION              = 'papertrail_wordpress_agent_token';
-const PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION       = 'papertrail_wordpress_agent_github_token';
 const PAPERTRAIL_WP_AGENT_SAVE_ACTION               = 'papertrail_wordpress_agent_save';
 const PAPERTRAIL_WP_AGENT_RELEASE_ACTION            = 'papertrail_wordpress_agent_release';
 const PAPERTRAIL_WP_AGENT_TEST_ACTION               = 'papertrail_wordpress_agent_test';
@@ -20,7 +19,6 @@ const PAPERTRAIL_WP_AGENT_REST_NAMESPACE            = 'papertrail/v1';
 
 require plugin_dir_path(__FILE__) . 'plugin-update-checker/plugin-update-checker.php';
 require plugin_dir_path(__FILE__) . 'includes/encryption.php';
-require plugin_dir_path(__FILE__) . 'includes/github.php';
 require plugin_dir_path(__FILE__) . 'includes/rest.php';
 require plugin_dir_path(__FILE__) . 'includes/updates.php';
 
@@ -73,12 +71,6 @@ function papertrail_wordpress_agent_save_token()
         $token = trim(sanitize_text_field(wp_unslash($_POST[PAPERTRAIL_WP_AGENT_TOKEN_OPTION])));
     }
 
-    // Retrieve the GitHub creds
-    $github_token = '';
-    if (isset($_POST[PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION]) && is_string($_POST[PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION])) {
-        $github_token = trim(sanitize_text_field(wp_unslash($_POST[PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION])));
-    }
-
     // Redirect if no token provided
     if ($token === '') {
         papertrail_wordpress_agent_redirect_back('empty');
@@ -86,10 +78,6 @@ function papertrail_wordpress_agent_save_token()
 
     // Save token to database
     update_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION, hash('sha256', $token));
-
-    papertrail_save_github_credentials(
-        $github_token
-    );
 
     // Redirect after saving
     papertrail_wordpress_agent_redirect_back('saved');
@@ -118,7 +106,6 @@ function papertrail_wordpress_agent_release_token()
 
     // Remove the stored token
     delete_option(PAPERTRAIL_WP_AGENT_TOKEN_OPTION);
-    delete_option(PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION);
 
     // Redirect after releasing
     papertrail_wordpress_agent_redirect_back('released');

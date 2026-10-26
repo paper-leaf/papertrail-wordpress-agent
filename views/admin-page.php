@@ -75,18 +75,6 @@ $papertrail_notice        = isset($_GET['papertrail-notice']) ? sanitize_key(wp_
                 />
             </p>
 
-            <p>
-                <label for="papertrail-wordpress-agent-github-token">
-                    <?php echo esc_html__('GitHub Access Token', 'papertrail-wordpress-agent'); ?>
-                </label>
-                <input
-                    type="password"
-                    id="papertrail-wordpress-agent-github-token"
-                    name="<?php echo esc_attr(PAPERTRAIL_WP_AGENT_GITHUB_TOKEN_OPTION); ?>"
-                    autocomplete="off"
-                />
-            </p>
-
             <?php submit_button(__('Save token', 'papertrail-wordpress-agent')); ?>
         </form>
 

@@ -14,12 +14,4 @@ add_action('plugins_loaded', function () {
 
     // Set the access details
     $updateChecker->setBranch('main');
-
-    $token = papertrail_get_github_token();
-    if ($token === '') {
-        return;
-    }
-
-    $updateChecker->setAuthentication($token);
-
 }, 20);
